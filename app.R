@@ -9,7 +9,7 @@ library(DT)
 
 dataTableOutput <- DT::dataTableOutput
 renderDataTable <- DT::renderDataTable
-datatable <- DT::datatable
+datatable <- function(...) DT::datatable( ..., rownames = FALSE )
 
 tweet <- function(id){
   url <- paste0( "https://publish.twitter.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F", id )
@@ -26,24 +26,23 @@ ui <- dashboardPage(
 
       valueBoxOutput("n_tweets", width = 2),
       valueBoxOutput("n_screen_name", width = 2),
-      valueBoxOutput("n_hashtags", width = 2)
+      valueBoxOutput("n_hashtags", width = 2), 
+      valueBoxOutput("n_emojis", width = 2), 
+      valueBoxOutput("n_medias", width = 2)
 
     ),
 
     fluidRow(
       tabBox( title = "Popular", id = "popular_tabbox", width = 4,
-        tabPanel( "Most Popular tweets",
-          uiOutput("most_popular_tweets")
-        ),
-        tabPanel( "Most Retweeted",
-          uiOutput("most_retweeted")
-        )
+        tabPanel( icon("calendar"), dataTableOutput("recent_tweets") ), 
+        tabPanel( icon("heart"), dataTableOutput("most_popular_tweets") ),
+        tabPanel( icon("retweet"), dataTableOutput("most_retweeted") )
       ),
 
       tabBox( title = "Users", id = "users_tabbox", width = 4,
-        tabPanel( "User", dataTableOutput("users") ),
-        tabPanel( "Cited", dataTableOutput("cited_users") ),
-        tabPanel( "Replied to", dataTableOutput("replied_users") )
+        tabPanel( icon("user"), dataTableOutput("users") ),
+        tabPanel( icon( "quote-right"), dataTableOutput("cited_users") ),
+        tabPanel( icon("reply"), dataTableOutput("replied_users") )
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
@@ -70,8 +69,24 @@ user_data <- function( x ){
   res
 }
 
+
 server <- function(input, output, session) {
 
+  getTweets <- function( id){
+    n <- length(id)
+    withProgress(min = 0, max = n, value = 0, message = "extract tweets", {
+      
+      tibble( 
+          tweet = map( id, ~{ 
+            res <- tweet(.) 
+            incProgress(amount = 1)
+            res
+          } )
+        ) %>% 
+        datatable( options = list( pageLength = 2) )
+    })
+  }
+  
   query <- "#useR2017 #user2017"
   minute <- 60 * 1000
   
@@ -116,11 +131,15 @@ server <- function(input, output, session) {
   })
 
   most_popular_tweets <- reactive({
-    tweets() %>% top_n( n = 5, favorite_count ) %>% arrange( desc(favorite_count) ) %>% pull(status_id)
+    tweets() %>% top_n( n = 6, favorite_count ) %>% arrange( desc(favorite_count) ) %>% pull(status_id)
   })
 
   most_retweeted <- reactive({
-    tweets() %>% top_n( n = 5, retweet_count ) %>% arrange( desc(retweet_count) ) %>% pull(status_id)
+    tweets() %>% top_n( n = 6, retweet_count ) %>% arrange( desc(retweet_count) ) %>% pull(status_id)
+  })
+  
+  recent_tweets <- reactive({
+    tweets() %>% arrange(desc(created_at)) %>% head(6) %>% pull(status_id)
   })
 
   users <- reactive( user_data( tweets()$user_id ) )
@@ -158,15 +177,24 @@ server <- function(input, output, session) {
   output$n_hashtags <- renderValueBox({
     valueBox( "Hashtags", nrow(hashtags()), icon = icon("hashtag"), color = "blue" )
   })
-
-  output$most_popular_tweets <- renderUI({
-    div( map( most_popular_tweets(), tweet ) )
+  
+  
+  output$n_emojis <- renderValueBox({
+    emos <- nrow(emojis())
+    valueBox( "Emojis", emos, icon = icon("heart"), color = "olive" )
   })
-
-  output$most_retweeted <- renderUI({
-    div( map( most_retweeted(), tweet ) )
+  
+  output$n_medias <- renderValueBox({
+    emos <- nrow(medias())
+    
+    valueBox( "Media", emos, icon = icon("image"), color = "red" )
   })
-
+  
+  
+  output$most_popular_tweets <- renderDataTable( getTweets( most_popular_tweets() ) )
+  output$most_retweeted <- renderDataTable( getTweets( most_retweeted() ) )
+  output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
+  
   output$users <- renderDataTable({
     datatable( select( users(), name, n, followers_count ), options = list( pageLength = 20) )
   })
