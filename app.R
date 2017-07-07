@@ -75,7 +75,7 @@ ui <- dashboardPage( skin = "black",
 
       tabBox( title = "Users", id = "users_tabbox", width = 4,
         tabPanel( icon("user"), dataTableOutput("users") ),
-        tabPanel( icon( "quote-right"), dataTableOutput("cited_users") ),
+        tabPanel( icon("quote-right"), dataTableOutput("cited_users") ),
         tabPanel( icon("reply"), dataTableOutput("replied_users") )
       ),
 
@@ -217,7 +217,7 @@ server <- function(input, output, session) {
   output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
   
   userDataTable <- function( data ){
-    data <-  users() %>% 
+    data %>% 
       mutate( img = sprintf('<img src="%s" />', profile_image_url ) ) %>% 
       select( img, name, n, followers_count ) %>% 
       datatable( options = list( pageLength = 10), escape = FALSE )
