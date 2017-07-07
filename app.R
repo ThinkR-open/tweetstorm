@@ -37,7 +37,19 @@ thinkr_link <- function(){
 ui <- dashboardPage( skin = "black", 
   dashboardHeader(title = "tweetstorm"),
   dashboardSidebar(
-    textInput("query", label = "Query", value = "#useR2017")
+    
+    textInput("query", label = "Query", value = "#useR2017"),
+    actionButton( "refresh", label = NULL, icon = icon( "refresh" ) ),
+    
+    sliderInput( "max_tweets", label = "Number of Tweets",
+      min = 1000, max = 18000, value = 2000, step = 500 )
+
+    # sliderInput( "refresh_minute", "Refresh every . minutes", 
+    #   min = 1, max = 10, value = 3, step = .5
+    # ),
+    
+    
+    
   ),
   dashboardBody(
 
@@ -109,17 +121,15 @@ server <- function(input, output, session) {
     })
   }
   
-  query <- reactive({
-    input$query
-  })
-  minute <- 60 * 1000
-  
   tweets <- reactive({
+    input$refresh
+    
     withProgress(min=0, max=1, value = .2, message = "updating tweets", {
-        n <- 18000
-        res <- search_tweets( query() , n = n, include_rts = FALSE)
-        invalidateLater(minute)
-        res
+        search_tweets( 
+          isolate(input$query) , 
+          n = isolate(input$max_tweets), 
+          include_rts = FALSE
+        )
     })
   })
   
