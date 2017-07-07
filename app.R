@@ -5,6 +5,11 @@ library(purrr)
 library(rtweet)
 library(tidyverse)
 library(stringr)
+library(DT)
+
+dataTableOutput <- DT::dataTableOutput
+renderDataTable <- DT::renderDataTable
+datatable <- DT::datatable
 
 tweet <- function(id){
   url <- paste0( "https://publish.twitter.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F", id )
@@ -15,8 +20,6 @@ ui <- dashboardPage(
   dashboardHeader(title = "#useR2017 tweetstorm"),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
-
-    # tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
 
     # Boxes need to be put in a row (or column)
     fluidRow(
@@ -38,14 +41,14 @@ ui <- dashboardPage(
       ),
 
       tabBox( title = "Users", id = "users_tabbox", width = 4,
-        tabPanel( "User", DT::dataTableOutput("users") ),
-        tabPanel( "Cited", DT::dataTableOutput("cited_users") ),
-        tabPanel( "Replied to", DT::dataTableOutput("replied_users") )
+        tabPanel( "User", dataTableOutput("users") ),
+        tabPanel( "Cited", dataTableOutput("cited_users") ),
+        tabPanel( "Replied to", dataTableOutput("replied_users") )
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
-        tabPanel( "Hashtags", DT::dataTableOutput("hashtags") ),
-        tabPanel( "Medias", DT::dataTableOutput("medias") )
+        tabPanel( "Hashtags", dataTableOutput("hashtags") ),
+        tabPanel( "Medias", dataTableOutput("medias") )
       )
     )
   )
@@ -130,24 +133,24 @@ server <- function(input, output) {
     div( map( most_retweeted(), tweet ) )
   })
 
-  output$users <- DT::renderDataTable({
-    DT::datatable( select( users(), name, n, followers_count ) )
+  output$users <- renderDataTable({
+    datatable( select( users(), name, n, followers_count ) )
   })
 
-  output$cited_users <- DT::renderDataTable({
-    DT::datatable( select( cited(), name, n, followers_count ) )
+  output$cited_users <- renderDataTable({
+    datatable( select( cited(), name, n, followers_count ) )
   })
 
-  output$replied_users <- DT::renderDataTable({
-    DT::datatable( select( replied_users(), name, n, followers_count ) )
+  output$replied_users <- renderDataTable({
+    datatable( select( replied_users(), name, n, followers_count ) )
   })
 
-  output$hashtags <- DT::renderDataTable({
-    DT::datatable( hashtags() )
+  output$hashtags <- renderDataTable({
+    datatable( hashtags() )
   })
 
-  output$medias <- DT::renderDataTable({
-    DT::datatable( medias(), escape = FALSE, options = list( pageLength = 2) )
+  output$medias <- renderDataTable({
+    datatable( medias(), escape = FALSE, options = list( pageLength = 2) )
   })
 
 }
