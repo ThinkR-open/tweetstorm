@@ -48,7 +48,8 @@ ui <- dashboardPage(
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
         tabPanel( "Hashtags", dataTableOutput("hashtags") ),
-        tabPanel( "Medias", dataTableOutput("medias") )
+        tabPanel( "Medias", dataTableOutput("medias") ), 
+        tabPanel( "Emojis", dataTableOutput("emojis") )
       )
     )
   )
@@ -95,6 +96,16 @@ server <- function(input, output, session) {
       })
     }
   )
+  
+  emojis <- reactive({
+    tweets()$text %>%
+      str_extract_all("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+") %>% unlist() %>%
+      str_split("") %>% unlist() %>% 
+      table() %>% sort(decreasing = TRUE) %>% as_tibble() %>% 
+      set_names( c("Emoji", "Frequency") ) %>% 
+      filter( ! str_detect(Emoji, "^[-[:space:]]" ) )
+  })
+  
   
   n_tweets <- reactive({
     nrow(tweets())
@@ -157,25 +168,29 @@ server <- function(input, output, session) {
   })
 
   output$users <- renderDataTable({
-    datatable( select( users(), name, n, followers_count ) )
+    datatable( select( users(), name, n, followers_count ), options = list( pageLength = 20) )
   })
 
   output$cited_users <- renderDataTable({
-    datatable( select( cited(), name, n, followers_count ) )
+    datatable( select( cited(), name, n, followers_count ), options = list( pageLength = 20) )
   })
 
   output$replied_users <- renderDataTable({
-    datatable( select( replied_users(), name, n, followers_count ) )
+    datatable( select( replied_users(), name, n, followers_count ), options = list( pageLength = 20) )
   })
 
   output$hashtags <- renderDataTable({
-    datatable( hashtags() )
+    datatable( hashtags(), options = list( pageLength = 20) )
   })
 
   output$medias <- renderDataTable({
     datatable( medias(), escape = FALSE, options = list( pageLength = 2) )
   })
 
+  output$emojis <- renderDataTable({
+    datatable( emojis(), escape = FALSE, options = list( pageLength = 20) )
+  })
+  
 }
 
 shinyApp(ui, server)
