@@ -2,6 +2,9 @@ library(shinydashboard)
 library(shiny)
 library(jsonlite)
 library(purrr)
+library(rtweet)
+library(tidyverse)
+library(stringr)
 
 tweet <- function(id){
   url <- paste0( "https://publish.twitter.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F", id )
@@ -65,7 +68,7 @@ user_data <- function( x ){
 
 server <- function(input, output) {
 
-  # tweets <- search_tweets( "#useR2017 #user2017", n = 18000,  include_rts = FALSE)
+   tweets <- search_tweets( "#useR2017 #user2017", n = 18000,  include_rts = FALSE)
 
   n_tweets <- reactive({
     nrow(tweets)
