@@ -69,33 +69,56 @@ user_data <- function( x ){
   res
 }
 
-server <- function(input, output) {
+server <- function(input, output, session) {
 
-   tweets <- search_tweets( "#useR2017 #user2017", n = 18000,  include_rts = FALSE)
-
+  query <- "#useR2017 #user2017"
+  minute <- 60 * 1000
+  
+  tweets <- reactivePoll(minute, session, 
+    checkFunc = function(){
+      # can be smart here about not calling search_tweets all the time
+      # and maybe accross sessions ... 
+      withProgress(min = 0, max = 1, value = .4, message = "polling", {
+        
+        search_tweets(query, include_rts = FALSE) %>% 
+            arrange( desc(created_at) ) %>% 
+            head(1) %>% 
+            pull(status_id)    
+        
+      })
+      
+    }, 
+    valueFunc = function(){
+      n <- 18000
+      withProgress(min=0, max=1, value = .2, message = "updating tweets", {
+        search_tweets( query, n = n, include_rts = FALSE)  
+      })
+    }
+  )
+  
   n_tweets <- reactive({
-    nrow(tweets)
+    nrow(tweets())
   })
 
   n_screen_name <- reactive({
-    length( unique(tweets$screen_name) )
+    length( unique(tweets()$screen_name) )
   })
 
   most_popular_tweets <- reactive({
-    tweets %>% top_n( n = 5, favorite_count ) %>% arrange( desc(favorite_count) ) %>% pull(status_id)
+    tweets() %>% top_n( n = 5, favorite_count ) %>% arrange( desc(favorite_count) ) %>% pull(status_id)
   })
 
   most_retweeted <- reactive({
-    tweets %>% top_n( n = 5, retweet_count ) %>% arrange( desc(retweet_count) ) %>% pull(status_id)
+    tweets() %>% top_n( n = 5, retweet_count ) %>% arrange( desc(retweet_count) ) %>% pull(status_id)
   })
 
-  users <- reactive( user_data( tweets$user_id ) )
-  cited <- reactive( user_data( tweets$mentions_user_id ) )
-  replied_users <- reactive( user_data( tweets$in_reply_to_status_user_id ) )
+  users <- reactive( user_data( tweets()$user_id ) )
+  cited <- reactive( user_data( tweets()$mentions_user_id ) )
+  replied_users <- reactive( user_data( tweets()$in_reply_to_status_user_id ) )
 
   hashtags <- reactive({
     tibble(
-      hashtag   = str_split( tweets$hashtags, " " ) %>% flatten_chr()
+      hashtag   = str_split( tweets()$hashtags, " " ) %>% flatten_chr()
     ) %>%
       filter( !is.na(hashtag) ) %>%
       group_by(hashtag) %>%
@@ -104,7 +127,7 @@ server <- function(input, output) {
   })
 
   medias <- reactive({
-    tweets %>%
+    tweets() %>%
       filter( !is.na(media_url) ) %>%
       select( status_id, user_id, media_url, favorite_count ) %>%
       arrange( desc( favorite_count ) ) %>%
