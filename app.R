@@ -46,9 +46,9 @@ ui <- dashboardPage(
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
+        tabPanel( "Emojis", dataTableOutput("emojis") ), 
         tabPanel( icon( "hashtag" ), dataTableOutput("hashtags") ),
-        tabPanel( icon("image"), dataTableOutput("medias") ), 
-        tabPanel( "Emojis", dataTableOutput("emojis") )
+        tabPanel( icon("image"), dataTableOutput("medias") )
       )
     )
   )
@@ -83,7 +83,7 @@ server <- function(input, output, session) {
             res
           } )
         ) %>% 
-        datatable( options = list( pageLength = 2) )
+        datatable( options = list( pageLength = 3) )
     })
   }
   
@@ -195,20 +195,33 @@ server <- function(input, output, session) {
   output$most_retweeted <- renderDataTable( getTweets( most_retweeted() ) )
   output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
   
+  userDataTable <- function( data ){
+    data <-  users() %>% 
+      mutate( img = sprintf('<img src="%s" />', profile_image_url ) ) %>% 
+      select( img, name, n, followers_count ) %>% 
+      datatable( options = list( pageLength = 10), escape = FALSE )
+  }
+  
   output$users <- renderDataTable({
-    datatable( select( users(), name, n, followers_count ), options = list( pageLength = 20) )
+    userDataTable( users() )
   })
 
   output$cited_users <- renderDataTable({
-    datatable( select( cited(), name, n, followers_count ), options = list( pageLength = 20) )
+    userDataTable( cited() )
   })
 
   output$replied_users <- renderDataTable({
-    datatable( select( replied_users(), name, n, followers_count ), options = list( pageLength = 20) )
+    userDataTable( replied_users() )
   })
 
   output$hashtags <- renderDataTable({
-    datatable( hashtags(), options = list( pageLength = 20) )
+    data <- hashtags() %>%
+      mutate( group = cut( n, seq(0, max(n)+10, by = 5   )) ) %>% 
+      group_by( group ) %>% 
+      summarise( hashtag = paste(hashtag, collapse = ", ") ) %>% 
+      arrange( desc(group) )
+    
+    datatable( data, options = list( pageLength = 20) )
   })
 
   output$medias <- renderDataTable({
