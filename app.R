@@ -35,8 +35,10 @@ thinkr_link <- function(){
 
 
 ui <- dashboardPage( skin = "black", 
-  dashboardHeader(title = "#useR2017 tweetstorm"),
-  dashboardSidebar(disable = TRUE),
+  dashboardHeader(title = "tweetstorm"),
+  dashboardSidebar(
+    textInput("query", label = "Query", value = "#useR2017")
+  ),
   dashboardBody(
 
     thinkr_link(), 
@@ -107,13 +109,15 @@ server <- function(input, output, session) {
     })
   }
   
-  query <- "#useR2017 #user2017"
+  query <- reactive({
+    input$query
+  })
   minute <- 60 * 1000
   
   tweets <- reactive({
     withProgress(min=0, max=1, value = .2, message = "updating tweets", {
         n <- 18000
-        res <- search_tweets( query, n = n, include_rts = FALSE)
+        res <- search_tweets( query() , n = n, include_rts = FALSE)
         invalidateLater(minute)
         res
     })
