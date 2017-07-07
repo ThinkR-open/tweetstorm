@@ -46,8 +46,8 @@ ui <- dashboardPage(
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
-        tabPanel( "Hashtags", dataTableOutput("hashtags") ),
-        tabPanel( "Medias", dataTableOutput("medias") ), 
+        tabPanel( icon( "hashtag" ), dataTableOutput("hashtags") ),
+        tabPanel( icon("image"), dataTableOutput("medias") ), 
         tabPanel( "Emojis", dataTableOutput("emojis") )
       )
     )
@@ -118,7 +118,7 @@ server <- function(input, output, session) {
       str_split("") %>% unlist() %>% 
       table() %>% sort(decreasing = TRUE) %>% as_tibble() %>% 
       set_names( c("Emoji", "Frequency") ) %>% 
-      filter( ! str_detect(Emoji, "^[-[:space:]]" ) )
+      filter( ! str_detect(Emoji, "^[-[:space:]]" ) ) 
   })
   
   
@@ -216,7 +216,14 @@ server <- function(input, output, session) {
   })
 
   output$emojis <- renderDataTable({
-    datatable( emojis(), escape = FALSE, options = list( pageLength = 20) )
+    
+    data <- emojis() %>% 
+      mutate( group = cut( Frequency, seq(0, max(Frequency)+10, by = 2   )) ) %>% 
+      group_by( group ) %>% 
+      summarise( Emoji = paste(Emoji, collapse = "") ) %>% 
+      arrange( desc(group) )
+    
+    datatable( data , escape = FALSE, options = list( pageLength = 20) )
   })
   
 }
