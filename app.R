@@ -90,27 +90,14 @@ server <- function(input, output, session) {
   query <- "#useR2017 #user2017"
   minute <- 60 * 1000
   
-  tweets <- reactivePoll(minute, session, 
-    checkFunc = function(){
-      # can be smart here about not calling search_tweets all the time
-      # and maybe accross sessions ... 
-      withProgress(min = 0, max = 1, value = .4, message = "polling", {
-        
-        search_tweets(query, include_rts = FALSE) %>% 
-            arrange( desc(created_at) ) %>% 
-            head(1) %>% 
-            pull(status_id)    
-        
-      })
-      
-    }, 
-    valueFunc = function(){
-      n <- 18000
-      withProgress(min=0, max=1, value = .2, message = "updating tweets", {
-        search_tweets( query, n = n, include_rts = FALSE)  
-      })
-    }
-  )
+  tweets <- reactive({
+    withProgress(min=0, max=1, value = .2, message = "updating tweets", {
+        n <- 18000
+        res <- search_tweets( query, n = n, include_rts = FALSE)
+        invalidateLater(minute)
+        res
+    })
+  })
   
   emojis <- reactive({
     tweets()$text %>%
