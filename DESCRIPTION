@@ -13,4 +13,5 @@ Encoding: UTF-8
 Imports: jsonlite,
     htmltools,
     stringr,
-    tibble
+    tibble,
+    magrittr

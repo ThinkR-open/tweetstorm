@@ -130,7 +130,7 @@ server <- function(input, output, session) {
   })
 
   most_popular_tweets <- reactive({
-    tweets() %>% top_n( n = 6, favorite_count ) %>% arrange( desc(favorite_count) ) %>% pull(status_id)
+    most_popular( tweets(), n = 6 )
   })
 
   most_retweeted <- reactive({

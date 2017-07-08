@@ -29,6 +29,7 @@ embed_tweet <- function(id){
 #' @export
 #' @importFrom stringr str_extract_all str_split
 #' @importFrom tibble as_tibble
+#' @importFrom magrittr %>%
 extract_emojis <- function(text){
   str_extract_all(text, "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+") %>% 
     unlist() %>%
@@ -38,4 +39,20 @@ extract_emojis <- function(text){
     sort(decreasing = TRUE) %>% 
     as_tibble() %>% 
     set_names( c("Emoji", "Frequency") )
+}
+
+
+#' most popular tweets
+#'
+#' @param tweets tweets data
+#' @param n number of tweets to extract
+#'
+#' @export
+#'
+#' @importFrom dplyr top_n arrange desc pull
+most_popular <- function( tweets, n = 6 ){
+  tweets %>% 
+    top_n( n = 6, favorite_count ) %>% 
+    arrange( desc(favorite_count) ) %>% 
+    pull(status_id)
 }
