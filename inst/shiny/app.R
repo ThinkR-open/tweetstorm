@@ -129,31 +129,15 @@ server <- function(input, output, session) {
     length( unique(tweets()$screen_name) )
   })
 
-  most_popular_tweets <- reactive({
-    most_popular( tweets(), n = 6 )
-  })
-
-  most_retweeted_tweets <- reactive({
-    most_retweeted( tweets(), n = 6 )
-  })
-  
-  recent_tweets <- reactive({
-    tweets() %>% arrange(desc(created_at)) %>% head(6) %>% pull(status_id)
-  })
+  most_popular_tweets <- reactive( most_popular( tweets(), n = 6 ) )
+  most_retweeted_tweets <- reactive( most_retweeted( tweets(), n = 6) )
+  recent_tweets <- reactive( most_recent(tweets(), n = 6) )
 
   users <- reactive( user_data( tweets()$user_id ) )
   cited <- reactive( user_data( tweets()$mentions_user_id ) )
   replied_users <- reactive( user_data( tweets()$in_reply_to_status_user_id ) )
 
-  hashtags <- reactive({
-    tibble(
-      hashtag   = str_split( tweets()$hashtags, " " ) %>% flatten_chr()
-    ) %>%
-      filter( !is.na(hashtag) ) %>%
-      group_by(hashtag) %>%
-      summarise( n = n() ) %>%
-      arrange( desc(n) )
-  })
+  hashtags <- reactive( summarise_hashtags( tweets()$hashtags ) )
 
   medias <- reactive({
     tweets() %>%

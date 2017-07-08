@@ -14,4 +14,6 @@ Imports: jsonlite,
     htmltools,
     stringr,
     tibble,
-    magrittr
+    magrittr,
+    rlang,
+    purrr

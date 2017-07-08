@@ -41,6 +41,7 @@ extract_emojis <- function(text){
     set_names( c("Emoji", "Frequency") )
 }
 
+#' @importFrom rlang enquo
 most <- function( tweets, n = 6, var ){
   var <- enquo(var)
   tweets %>% 
@@ -64,7 +65,38 @@ most_popular <- function( tweets, n = 6 ){
 
 #' @rdname most_popular
 #' @export
-most_retweeted <- function(n = 6){
+most_retweeted <- function(tweets, n = 6 ){
   most(tweets, n, retweet_count)
+}
+
+#' @rdname most_popular
+#' @export
+#' @importFrom utils head
+most_recent <- function( tweets, n = 6 ){
+  tweets %>% 
+    arrange(desc(created_at)) %>% 
+    head(6) %>% 
+    pull(status_id)
+}
+
+#' Summarise hashtags
+#'
+#' @param hashtags vector of hashtags
+#'
+#' @return a tibble
+#' @export
+#'
+#' @importFrom tibble tibble
+#' @importFrom purrr flatten_chr
+#' @importFrom stringr str_split
+#' @importFrom dplyr filter group_by summarise n arrange desc
+summarise_hashtags <- function( hashtags ){
+  tibble(
+    hashtag   = flatten_chr( str_split( hashtags, " " ) )
+  ) %>%
+    filter( !is.na(hashtag) ) %>%
+    group_by(hashtag) %>%
+    summarise( n = n() ) %>%
+    arrange( desc(n) )
 }
 
