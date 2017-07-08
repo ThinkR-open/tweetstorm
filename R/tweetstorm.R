@@ -48,7 +48,7 @@ random_tweet <- function(query = "#rstats" ){
 #'
 #' @param text text with emojis
 #'
-#' @return a tibble with the columns \code{Emoji} and \code{Frequency}
+#' @return a tibble with the columns \code{Emoji} and \code{n}
 #' 
 #' @references 
 #' Inspired from \url{http://seankross.com/2017/05/30/Which-Emojis-Does-Lucy-Use-in-Commit-Messages.html}
@@ -65,7 +65,7 @@ extract_emojis <- function(text){
     table() %>% 
     sort(decreasing = TRUE) %>% 
     as_tibble() %>% 
-    set_names( c("Emoji", "Frequency") )
+    set_names( c("Emoji", "n") )
 }
 
 #' @importFrom rlang enquo
@@ -143,4 +143,63 @@ extract_medias <- function( tweets ){
     mutate( media = glue( '<img src="{media_url}" width="100%"/> ' ) ) %>%
     select( favorite_count, media )
 }
+
+#' Extract users information
+#'
+#' @param x user ids
+#'
+#' @importFrom tibble tibble
+#' @importFrom purrr flatten_chr
+#' @importFrom stringr str_split
+#' @importFrom dplyr filter group_by summarise arrange desc bind_cols select
+#' @importFrom rtweet lookup_users
+#' 
+#' @export
+extract_users <- function( x ){
+  users <- tibble(
+    id   = flatten_chr(str_split( x, " " ) )
+  ) %>%
+    filter( !is.na(id) ) %>%
+    group_by(id) %>%
+    summarise( n = n() ) %>%
+    arrange( desc(n) )
+  
+  bind_cols( 
+    select(users, -id), 
+    lookup_users(users$id)
+  )
+}
+
+#' organise users in a data table
+#' 
+#' @param data 
+#'
+#' @importFrom DT datatable
+#' @export
+users_datatable <- function( data ){
+  data %>% 
+    mutate( img = sprintf('<img src="%s" />', profile_image_url ) ) %>% 
+    select( img, name, n, followers_count ) %>% 
+    datatable( options = list( pageLength = 10), escape = FALSE )
+}
+
+#' pack data 
+#' 
+#' @param data data 
+#' @param var variable to pack
+#' @param ... see \code{\link[base]{cut}}
+#'
+#' @export
+#' @importFrom rlang enquo quo_text
+#' @importFrom dplyr filter group_by summarise arrange desc bind_cols select
+pack <- function(data, var, ... ){
+  var <- enquo(var)
+  
+  data %>%
+    mutate( group = cut( n, seq(0, max(n)+10, ...  )) ) %>% 
+    group_by( group ) %>% 
+    summarise( !!quo_text(var) := paste(!!var, collapse = ", ") ) %>% 
+    arrange( desc(group) )
+}
+
 

@@ -1,11 +1,9 @@
 library(shinydashboard)
 library(shiny)
-library(jsonlite)
+library(DT)
 library(purrr)
 library(rtweet)
 library(tidyverse)
-library(stringr)
-library(DT)
 library(tweetstorm)
 
 dataTableOutput <- DT::dataTableOutput
@@ -44,19 +42,16 @@ ui <- dashboardPage( skin = "black",
 
     thinkr_branding(), 
     
-    # Boxes need to be put in a row (or column)
     fluidRow(
-
       valueBoxOutput("n_tweets", width = 2),
       valueBoxOutput("n_screen_name", width = 2),
       valueBoxOutput("n_hashtags", width = 2), 
       valueBoxOutput("n_emojis", width = 2), 
       valueBoxOutput("n_medias", width = 2)
-
     ),
 
     fluidRow(
-      tabBox( title = "Popular", id = "popular_tabbox", width = 4,
+      tabBox( title = "Tweets", id = "tweets_tabbox", width = 4,
         tabPanel( icon("calendar"), dataTableOutput("recent_tweets") ), 
         tabPanel( icon("heart"), dataTableOutput("most_popular_tweets") ),
         tabPanel( icon("retweet"), dataTableOutput("most_retweeted") )
@@ -77,44 +72,14 @@ ui <- dashboardPage( skin = "black",
   )
 )
 
-user_data <- function( x ){
-  users <- tibble(
-    id   = str_split( x, " " ) %>% flatten_chr()
-  ) %>%
-    filter( !is.na(id) ) %>%
-    group_by(id) %>%
-    summarise( n = n() ) %>%
-    arrange( desc(n) )
-
-  lookups <- lookup_users(users$id)
-
-  res <- bind_cols( select(users, -id), lookups )
-  res
-}
-
-
 server <- function(input, output, session) {
 
-  getTweets <- function( id ){
-    n <- length(id)
-    withProgress(min = 0, max = n, value = 0, message = "extract tweets", {
-      
-      tibble( 
-          tweet = map( id, ~{ 
-            res <- embed_tweet(.) 
-            incProgress(amount = 1)
-            res
-          } )
-        ) %>% 
-        datatable( options = list( pageLength = 3) )
-    })
-  }
-  
   tweets <- reactive({
     input$refresh
-    withProgress(min=0, max=1, value = .2, message = "updating tweets", {
-      search_tweets(isolate(input$query), n = isolate(input$max_tweets), include_rts = FALSE )
-    })
+    # withProgress(min=0, max=1, value = .2, message = "updating tweets", {
+    #   search_tweets(isolate(input$query), n = isolate(input$max_tweets), include_rts = FALSE )
+    # })
+    useR2017
   })
   
   emojis <- reactive({
@@ -133,9 +98,9 @@ server <- function(input, output, session) {
   most_retweeted_tweets <- reactive( most_retweeted( tweets(), n = 6) )
   recent_tweets <- reactive( most_recent(tweets(), n = 6) )
 
-  users <- reactive( user_data( tweets()$user_id ) )
-  cited <- reactive( user_data( tweets()$mentions_user_id ) )
-  replied_users <- reactive( user_data( tweets()$in_reply_to_status_user_id ) )
+  users <- reactive( extract_users( tweets()$user_id ) )
+  cited <- reactive( extract_users( tweets()$mentions_user_id ) )
+  replied_users <- reactive( extract_users( tweets()$in_reply_to_status_user_id ) )
 
   hashtags <- reactive( summarise_hashtags( tweets()$hashtags ) )
   medias <- reactive( extract_medias(tweets()) )
@@ -160,55 +125,40 @@ server <- function(input, output, session) {
     valueBox( "Media", nrow(medias()), icon = icon("image"), color = "red" )
   })
   
-  
+  getTweets <- function( id ){
+    n <- length(id)
+    withProgress(min = 0, max = n, value = 0, message = "extract tweets", {
+      
+      tibble( 
+        tweet = map( id, ~{ 
+          res <- embed_tweet(.) 
+          incProgress(amount = 1)
+          res
+        } )
+      ) %>% 
+        datatable( options = list( pageLength = 3) )
+    })
+  }
   output$most_popular_tweets <- renderDataTable( getTweets( most_popular_tweets() ) )
   output$most_retweeted <- renderDataTable( getTweets( most_retweeted_tweets() ) )
   output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
   
-  userDataTable <- function( data ){
-    data %>% 
-      mutate( img = sprintf('<img src="%s" />', profile_image_url ) ) %>% 
-      select( img, name, n, followers_count ) %>% 
-      datatable( options = list( pageLength = 10), escape = FALSE )
-  }
-  
-  output$users <- renderDataTable({
-    userDataTable( users() )
+  output$users <- renderDataTable( users_datatable(users()) )
+  output$cited_users <- renderDataTable( users_datatable(cited()) )
+  output$replied_users <- renderDataTable( users_datatable(replied_users()) )
+
+  output$hashtags <- renderDataTable( {
+    pack( hashtags(), hashtag, by = 5 ) %>% 
+      datatable( options = list( pageLength = 20 ))
+  })
+  output$emojis <- renderDataTable( {
+    pack( emojis(), Emoji, by = 2) %>% 
+      datatable( options = list( pageLength = 20 ))
+  })
+  output$medias <- renderDataTable( {
+    datatable( medias(), escape = FALSE, options = list( pageLength = 2) ) 
   })
 
-  output$cited_users <- renderDataTable({
-    userDataTable( cited() )
-  })
-
-  output$replied_users <- renderDataTable({
-    userDataTable( replied_users() )
-  })
-
-  output$hashtags <- renderDataTable({
-    data <- hashtags() %>%
-      mutate( group = cut( n, seq(0, max(n)+10, by = 5   )) ) %>% 
-      group_by( group ) %>% 
-      summarise( hashtag = paste(hashtag, collapse = ", ") ) %>% 
-      arrange( desc(group) )
-    
-    datatable( data, options = list( pageLength = 20) )
-  })
-
-  output$medias <- renderDataTable({
-    datatable( medias(), escape = FALSE, options = list( pageLength = 2) )
-  })
-
-  output$emojis <- renderDataTable({
-    
-    data <- emojis() %>% 
-      mutate( group = cut( Frequency, seq(0, max(Frequency)+10, by = 2   )) ) %>% 
-      group_by( group ) %>% 
-      summarise( Emoji = paste(Emoji, collapse = "") ) %>% 
-      arrange( desc(group) )
-    
-    datatable( data , escape = FALSE, options = list( pageLength = 20) )
-  })
-  
 }
 
 shinyApp(ui, server)

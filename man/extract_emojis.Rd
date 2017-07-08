@@ -10,7 +10,7 @@ extract_emojis(text)
 \item{text}{text with emojis}
 }
 \value{
-a tibble with the columns \code{Emoji} and \code{Frequency}
+a tibble with the columns \code{Emoji} and \code{n}
 }
 \description{
 Extract emojis
