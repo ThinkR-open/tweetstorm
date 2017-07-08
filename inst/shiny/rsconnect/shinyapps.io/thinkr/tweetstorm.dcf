@@ -3,9 +3,9 @@ title: tweetstorm
 account: thinkr
 server: shinyapps.io
 appId: 194923
-bundleId: 895133
+bundleId: 895675
 url: https://thinkr.shinyapps.io/tweetstorm/
-when: 1499411642.64435
+when: 1499439986.11763
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .httr-oauth|.Rbuildignore|data-raw/bla.R

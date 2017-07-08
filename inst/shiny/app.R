@@ -44,12 +44,6 @@ ui <- dashboardPage( skin = "black",
     sliderInput( "max_tweets", label = "Number of Tweets",
       min = 1000, max = 18000, value = 2000, step = 500 )
 
-    # sliderInput( "refresh_minute", "Refresh every . minutes", 
-    #   min = 1, max = 10, value = 3, step = .5
-    # ),
-    
-    
-    
   ),
   dashboardBody(
 

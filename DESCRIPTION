@@ -1,0 +1,14 @@
+Package: tweetstorm
+Type: Package
+Title: Twitter Analysis
+Version: 0.0.0
+Authors@R: c(
+    person("Romain", "Francois", , "romain@thinkr.fr", role = c("aut", "cre")
+    )
+Description: Twitter Analysis.
+License: MIT + file LICENSE
+LazyData: TRUE
+Depends: R (>= 2.10)
+RoxygenNote: 6.0.1.9000
+URL: https://github.com/ThinkRstat/tweetstorm
+Encoding: UTF-8
