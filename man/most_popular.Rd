@@ -2,9 +2,12 @@
 % Please edit documentation in R/tweetstorm.R
 \name{most_popular}
 \alias{most_popular}
+\alias{most_retweeted}
 \title{most popular tweets}
 \usage{
 most_popular(tweets, n = 6)
+
+most_retweeted(n = 6)
 }
 \arguments{
 \item{tweets}{tweets data}

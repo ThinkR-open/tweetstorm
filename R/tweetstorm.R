@@ -41,6 +41,14 @@ extract_emojis <- function(text){
     set_names( c("Emoji", "Frequency") )
 }
 
+most <- function( tweets, n = 6, var ){
+  var <- enquo(var)
+  tweets %>% 
+    top_n( n = 6, !!var ) %>% 
+    arrange( desc(favorite_count) ) %>% 
+    pull(status_id)
+  
+}
 
 #' most popular tweets
 #'
@@ -51,8 +59,12 @@ extract_emojis <- function(text){
 #'
 #' @importFrom dplyr top_n arrange desc pull
 most_popular <- function( tweets, n = 6 ){
-  tweets %>% 
-    top_n( n = 6, favorite_count ) %>% 
-    arrange( desc(favorite_count) ) %>% 
-    pull(status_id)
+  most(tweets, n, favorite_count)
 }
+
+#' @rdname most_popular
+#' @export
+most_retweeted <- function(n = 6){
+  most(tweets, n, retweet_count)
+}
+

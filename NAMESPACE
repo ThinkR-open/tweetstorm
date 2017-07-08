@@ -3,6 +3,7 @@
 export(embed_tweet)
 export(extract_emojis)
 export(most_popular)
+export(most_retweeted)
 importFrom(dplyr,arrange)
 importFrom(dplyr,desc)
 importFrom(dplyr,pull)

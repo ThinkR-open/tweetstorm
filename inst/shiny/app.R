@@ -133,8 +133,8 @@ server <- function(input, output, session) {
     most_popular( tweets(), n = 6 )
   })
 
-  most_retweeted <- reactive({
-    tweets() %>% top_n( n = 6, retweet_count ) %>% arrange( desc(retweet_count) ) %>% pull(status_id)
+  most_retweeted_tweets <- reactive({
+    most_retweeted( tweets(), n = 6 )
   })
   
   recent_tweets <- reactive({
@@ -191,7 +191,7 @@ server <- function(input, output, session) {
   
   
   output$most_popular_tweets <- renderDataTable( getTweets( most_popular_tweets() ) )
-  output$most_retweeted <- renderDataTable( getTweets( most_retweeted() ) )
+  output$most_retweeted <- renderDataTable( getTweets( most_retweeted_tweets() ) )
   output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
   
   userDataTable <- function( data ){
