@@ -6,17 +6,13 @@ library(rtweet)
 library(tidyverse)
 library(stringr)
 library(DT)
+library(tweetstorm)
 
 dataTableOutput <- DT::dataTableOutput
 renderDataTable <- DT::renderDataTable
 datatable <- function(...) DT::datatable( ..., rownames = FALSE )
 
-tweet <- function(id){
-  url <- paste0( "https://publish.twitter.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F", id )
-  HTML( fromJSON(url)$html )
-}
-
-thinkr_link <- function(){
+thinkr_branding <- function( repo = "tweetstorm" ){
   absolutePanel( # class = "panel panel-default panel-side",
     style = "z-index: 2000",
     fixed = TRUE, draggable = TRUE,
@@ -25,14 +21,13 @@ thinkr_link <- function(){
     width = "250px",
     div(
       tags$a( target="_blank", href = "http://www.thinkr.fr", tags$img(src="thinkR1.png", height = "30px", id = "logo") ),
-      tags$a( target="_blank", href = "https://github.com/ThinkRstat/tweetstorm", tags$img(src="https://cdn0.iconfinder.com/data/icons/octicons/1024/mark-github-256.png", height = "30px") ),
+      tags$a( target="_blank", href = paste0( "https://github.com/ThinkRstat/", repo), tags$img(src="https://cdn0.iconfinder.com/data/icons/octicons/1024/mark-github-256.png", height = "30px") ),
       tags$a( target="_blank", href = "https://twitter.com/thinkR_fr", tags$img(src="https://cdn3.iconfinder.com/data/icons/social-icons-5/128/Twitter.png", height = "30px") ),
       tags$a( target="_blank", href = "https://www.facebook.com/ThinkR-1776997009278055/", tags$img(src="https://cdn4.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-facebook-circle-128.png", height = "30px") )
     )
     
   )
 }
-
 
 ui <- dashboardPage( skin = "black", 
   dashboardHeader(title = "tweetstorm"),
@@ -47,7 +42,7 @@ ui <- dashboardPage( skin = "black",
   ),
   dashboardBody(
 
-    thinkr_link(), 
+    thinkr_branding(), 
     
     # Boxes need to be put in a row (or column)
     fluidRow(
@@ -106,7 +101,7 @@ server <- function(input, output, session) {
       
       tibble( 
           tweet = map( id, ~{ 
-            res <- tweet(.) 
+            res <- embed_tweet(.) 
             incProgress(amount = 1)
             res
           } )
