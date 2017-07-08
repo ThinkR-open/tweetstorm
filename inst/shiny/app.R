@@ -152,16 +152,12 @@ server <- function(input, output, session) {
     valueBox( "Hashtags", nrow(hashtags()), icon = icon("hashtag"), color = "blue" )
   })
   
-  
   output$n_emojis <- renderValueBox({
-    emos <- nrow(emojis())
-    valueBox( "Emojis", emos, icon = icon("heart"), color = "olive" )
+    valueBox( "Emojis", nrow(emojis()), icon = icon("heart"), color = "olive" )
   })
   
   output$n_medias <- renderValueBox({
-    emos <- nrow(medias())
-    
-    valueBox( "Media", emos, icon = icon("image"), color = "red" )
+    valueBox( "Media", nrow(medias()), icon = icon("image"), color = "red" )
   })
   
   

@@ -14,7 +14,34 @@
 #' @export
 embed_tweet <- function(id){
   url <- paste0( "https://publish.twitter.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F", id )
-  HTML( fromJSON(url)$html )
+  tweet <- HTML( fromJSON(url)$html )
+  
+  class( tweet ) <- c( "tweet", class(tweet) )
+  tweet
+}
+
+#' @importFrom htmltools html_print
+#' @export
+print.tweet <- function(x, ... ){
+  html_print(x)
+  invisible(x)
+}
+
+#' random tweet
+#' 
+#' @param query twitter query, see \code{\link[rtweet]{search_tweet}}
+#'
+#' @examples
+#' \dontrun{
+#'   embed_tweet( random_tweet("#rstats") )
+#' }
+#' @importFrom rtweet search_tweets
+#' @importFrom dplyr sample_n pull
+#' @export
+random_tweet <- function(query = "#rstats" ){
+  search_tweets( query ) %>% 
+    sample_n(1) %>% 
+    pull(status_id)
 }
 
 #' Extract emojis
