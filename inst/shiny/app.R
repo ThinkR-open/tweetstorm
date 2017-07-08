@@ -138,16 +138,7 @@ server <- function(input, output, session) {
   replied_users <- reactive( user_data( tweets()$in_reply_to_status_user_id ) )
 
   hashtags <- reactive( summarise_hashtags( tweets()$hashtags ) )
-
-  medias <- reactive({
-    tweets() %>%
-      filter( !is.na(media_url) ) %>%
-      select( status_id, user_id, media_url, favorite_count ) %>%
-      arrange( desc( favorite_count ) ) %>%
-      mutate( media = sprintf( '<img src="%s" width="100%%"/> ', media_url ) ) %>%
-      select( favorite_count, media )
-  })
-
+  medias <- reactive( extract_medias(tweets()) )
 
   output$n_tweets <- renderValueBox({
     valueBox( "Tweets", n_tweets(), icon = icon("twitter"), color = "purple" )

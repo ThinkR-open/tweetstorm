@@ -100,3 +100,20 @@ summarise_hashtags <- function( hashtags ){
     arrange( desc(n) )
 }
 
+
+#' Extract medias from tweets
+#'
+#' @param tweets tweets tibble
+#'
+#' @export
+#' @importFrom glue glue
+#' @importFrom dplyr select mutate
+extract_medias <- function( tweets ){
+  tweets %>%
+    filter( !is.na(media_url) ) %>%
+    select( status_id, user_id, media_url, favorite_count ) %>%
+    arrange( desc( favorite_count ) ) %>%
+    mutate( media = glue( '<img src="{media_url}" width="100%"/> ' ) ) %>%
+    select( favorite_count, media )
+}
+

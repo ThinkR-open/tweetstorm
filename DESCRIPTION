@@ -16,4 +16,5 @@ Imports: jsonlite,
     tibble,
     magrittr,
     rlang,
-    purrr
+    purrr,
+    glue
