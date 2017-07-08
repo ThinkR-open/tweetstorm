@@ -95,7 +95,7 @@ user_data <- function( x ){
 
 server <- function(input, output, session) {
 
-  getTweets <- function( id){
+  getTweets <- function( id ){
     n <- length(id)
     withProgress(min = 0, max = n, value = 0, message = "extract tweets", {
       
@@ -112,26 +112,15 @@ server <- function(input, output, session) {
   
   tweets <- reactive({
     input$refresh
-    
     withProgress(min=0, max=1, value = .2, message = "updating tweets", {
-        search_tweets( 
-          isolate(input$query) , 
-          n = isolate(input$max_tweets), 
-          include_rts = FALSE
-        )
+      search_tweets(isolate(input$query), n = isolate(input$max_tweets), include_rts = FALSE )
     })
   })
   
   emojis <- reactive({
-    tweets()$text %>%
-      str_extract_all("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+") %>% unlist() %>%
-      str_split("") %>% unlist() %>% 
-      table() %>% sort(decreasing = TRUE) %>% as_tibble() %>% 
-      set_names( c("Emoji", "Frequency") ) %>% 
-      filter( ! str_detect(Emoji, "^[-[:space:]]" ) ) 
+    extract_emojis(tweets()$text) 
   })
-  
-  
+
   n_tweets <- reactive({
     nrow(tweets())
   })
