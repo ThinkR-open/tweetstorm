@@ -7,7 +7,7 @@
 users_datatable(data)
 }
 \arguments{
-\item{data}{}
+\item{data}{tibble with user information}
 }
 \description{
 organise users in a data table

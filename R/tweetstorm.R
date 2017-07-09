@@ -29,7 +29,7 @@ print.tweet <- function(x, ... ){
 
 #' random tweet
 #' 
-#' @param query twitter query, see \code{\link[rtweet]{search_tweet}}
+#' @param query twitter query, see \code{\link[rtweet]{search_tweets}}
 #'
 #' @examples
 #' \dontrun{
@@ -56,7 +56,7 @@ random_tweet <- function(query = "#rstats" ){
 #' @export
 #' @importFrom stringr str_extract_all str_split
 #' @importFrom tibble as_tibble
-#' @importFrom magrittr %>%
+#' @importFrom magrittr %>% set_names
 extract_emojis <- function(text){
   str_extract_all(text, "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+") %>% 
     unlist() %>%
@@ -172,7 +172,7 @@ extract_users <- function( x ){
 
 #' organise users in a data table
 #' 
-#' @param data 
+#' @param data tibble with user information
 #'
 #' @importFrom DT datatable
 #' @export
@@ -190,7 +190,7 @@ users_datatable <- function( data ){
 #' @param ... see \code{\link[base]{cut}}
 #'
 #' @export
-#' @importFrom rlang enquo quo_text
+#' @importFrom rlang enquo quo_text := 
 #' @importFrom dplyr filter group_by summarise arrange desc bind_cols select
 pack <- function(data, var, ... ){
   var <- enquo(var)
