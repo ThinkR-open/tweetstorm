@@ -58,10 +58,14 @@ random_tweet <- function(query = "#rstats" ){
 #' @importFrom tibble as_tibble
 #' @importFrom magrittr %>% set_names
 extract_emojis <- function(text){
-  str_extract_all(text, "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+") %>% 
-    unlist() %>%
+  emoji_regex <- "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF\u2600-\u27ff]+"
+  not_equal <- function( x, text = "-" ) x[ x != text ]
+  
+  str_extract_all(text, emoji_regex ) %>% 
+    flatten_chr() %>% 
     str_split("") %>% 
-    unlist() %>% 
+    flatten_chr() %>% 
+    not_equal("-") %>% 
     table() %>% 
     sort(decreasing = TRUE) %>% 
     as_tibble() %>% 
