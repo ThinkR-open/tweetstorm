@@ -10,7 +10,7 @@ embed_tweet(id)
 \item{id}{status id of the tweet to embed}
 }
 \value{
-html embeddable tweet, e.g. inside a \code{\link[shiny]{renderUI}}
+html embeddable tweet, e.g. inside a [shiny::renderUI()]
 }
 \description{
 Embed tweet

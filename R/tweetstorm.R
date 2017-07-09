@@ -3,7 +3,7 @@
 #'
 #' @param id status id of the tweet to embed
 #'
-#' @return html embeddable tweet, e.g. inside a \code{\link[shiny]{renderUI}}
+#' @return html embeddable tweet, e.g. inside a [shiny::renderUI()] 
 #' @export
 #'
 #' @examples
@@ -29,7 +29,7 @@ print.tweet <- function(x, ... ){
 
 #' random tweet
 #' 
-#' @param query twitter query, see \code{\link[rtweet]{search_tweets}}
+#' @param query twitter query, see [rtweet::search_tweets]
 #'
 #' @examples
 #' \dontrun{
@@ -48,10 +48,10 @@ random_tweet <- function(query = "#rstats" ){
 #'
 #' @param text text with emojis
 #'
-#' @return a tibble with the columns \code{Emoji} and \code{n}
+#' @return a tibble with the columns `Emoji` and `n`
 #' 
 #' @references 
-#' Inspired from \url{http://seankross.com/2017/05/30/Which-Emojis-Does-Lucy-Use-in-Commit-Messages.html}
+#' Inspired from [](http://seankross.com/2017/05/30/Which-Emojis-Does-Lucy-Use-in-Commit-Messages.html)
 #' 
 #' @export
 #' @importFrom stringr str_extract_all str_split
@@ -187,7 +187,7 @@ users_datatable <- function( data ){
 #' 
 #' @param data data 
 #' @param var variable to pack
-#' @param ... see \code{\link[base]{cut}}
+#' @param ... see [base::cut]
 #'
 #' @export
 #' @importFrom rlang enquo quo_text := 

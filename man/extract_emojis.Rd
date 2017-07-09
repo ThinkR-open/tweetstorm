@@ -10,11 +10,11 @@ extract_emojis(text)
 \item{text}{text with emojis}
 }
 \value{
-a tibble with the columns \code{Emoji} and \code{n}
+a tibble with the columns `Emoji` and `n`
 }
 \description{
 Extract emojis
 }
 \references{
-Inspired from \url{http://seankross.com/2017/05/30/Which-Emojis-Does-Lucy-Use-in-Commit-Messages.html}
+Inspired from [](http://seankross.com/2017/05/30/Which-Emojis-Does-Lucy-Use-in-Commit-Messages.html)
 }

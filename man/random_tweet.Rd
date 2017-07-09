@@ -7,7 +7,7 @@
 random_tweet(query = "#rstats")
 }
 \arguments{
-\item{query}{twitter query, see \code{\link[rtweet]{search_tweets}}}
+\item{query}{twitter query, see [rtweet::search_tweets]}
 }
 \description{
 random tweet

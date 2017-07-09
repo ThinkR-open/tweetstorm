@@ -11,7 +11,7 @@ pack(data, var, ...)
 
 \item{var}{variable to pack}
 
-\item{...}{see \code{\link[base]{cut}}}
+\item{...}{see [base::cut]}
 }
 \description{
 pack data
