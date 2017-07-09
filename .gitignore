@@ -1,6 +1,4 @@
 .Rproj.user
 .Rhistory
 .RData
-data-raw
-.httr-oauth
-
+twitter_token
