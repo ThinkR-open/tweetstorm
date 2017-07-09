@@ -47,7 +47,8 @@ ui <- dashboardPage( skin = "black",
       valueBoxOutput("n_screen_name", width = 2),
       valueBoxOutput("n_hashtags", width = 2), 
       valueBoxOutput("n_emojis", width = 2), 
-      valueBoxOutput("n_medias", width = 2)
+      valueBoxOutput("n_medias", width = 2), 
+      valueBoxOutput("n_clients", width = 2)
     ),
 
     fluidRow(
@@ -60,7 +61,8 @@ ui <- dashboardPage( skin = "black",
       tabBox( title = "Users", id = "users_tabbox", width = 4,
         tabPanel( icon("user"), dataTableOutput("users") ),
         tabPanel( icon("quote-right"), dataTableOutput("cited_users") ),
-        tabPanel( icon("reply"), dataTableOutput("replied_users") )
+        tabPanel( icon("reply"), dataTableOutput("replied_users") ), 
+        tabPanel( icon("cogs"), dataTableOutput("twitter_client") )
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
@@ -125,6 +127,10 @@ server <- function(input, output, session) {
     valueBox( "Media", nrow(medias()), icon = icon("image"), color = "red" )
   })
   
+  output$n_clients <- renderValueBox({
+    valueBox( "Clients", nrow(twitter_clients()), icon = icon("cogs"), color = "blue" )
+  }) 
+  
   getTweets <- function( id ){
     n <- length(id)
     withProgress(min = 0, max = n, value = 0, message = "extract tweets", {
@@ -143,10 +149,18 @@ server <- function(input, output, session) {
   output$most_retweeted <- renderDataTable( getTweets( most_retweeted_tweets() ) )
   output$recent_tweets <- renderDataTable( getTweets( recent_tweets()  ) )
   
+  twitter_clients <- reactive({
+    tweets() %>% 
+      group_by(source) %>% 
+      tally() %>% 
+      arrange(desc(n)) 
+  })
+  
   output$users <- renderDataTable( users_datatable(users()) )
   output$cited_users <- renderDataTable( users_datatable(cited()) )
   output$replied_users <- renderDataTable( users_datatable(replied_users()) )
-
+  output$twitter_client <- renderDataTable( datatable(twitter_clients()) )
+  
   output$hashtags <- renderDataTable( {
     pack( hashtags(), hashtag, by = 5 ) %>% 
       datatable( options = list( pageLength = 20 ))
