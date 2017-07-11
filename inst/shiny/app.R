@@ -62,13 +62,14 @@ ui <- dashboardPage( skin = "black",
         tabPanel( icon("user"), dataTableOutput("users") ),
         tabPanel( icon("quote-right"), dataTableOutput("cited_users") ),
         tabPanel( icon("reply"), dataTableOutput("replied_users") ), 
-        tabPanel( icon("cogs"), dataTableOutput("twitter_client") )
+        tabPanel( icon("smile-o"), dataTableOutput("emoji_users") )
       ),
 
       tabBox( title = "Content", id = "content_tabbox", width = 4,
         tabPanel( "Emojis", dataTableOutput("emojis") ), 
         tabPanel( icon( "hashtag" ), dataTableOutput("hashtags") ),
-        tabPanel( icon("image"), dataTableOutput("medias") )
+        tabPanel( icon("image"), dataTableOutput("medias") ), 
+        tabPanel( icon("cogs"), dataTableOutput("twitter_client") )
       )
     )
   )
@@ -159,7 +160,11 @@ server <- function(input, output, session) {
   output$users <- renderDataTable( users_datatable(users()) )
   output$cited_users <- renderDataTable( users_datatable(cited()) )
   output$replied_users <- renderDataTable( users_datatable(replied_users()) )
-  output$twitter_client <- renderDataTable( datatable(twitter_clients()) )
+  
+  output$emoji_users <- renderDataTable({
+    datatable( extract_emojis_users( tweets() ), escape = FALSE )
+  })
+  
   
   output$hashtags <- renderDataTable( {
     pack( hashtags(), hashtag, by = 5 ) %>% 
@@ -172,7 +177,8 @@ server <- function(input, output, session) {
   output$medias <- renderDataTable( {
     datatable( medias(), escape = FALSE, options = list( pageLength = 2) ) 
   })
-
+  output$twitter_client <- renderDataTable( datatable(twitter_clients()) )
+  
 }
 
 shinyApp(ui, server)

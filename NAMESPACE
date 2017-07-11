@@ -3,6 +3,7 @@
 S3method(print,tweet)
 export(embed_tweet)
 export(extract_emojis)
+export(extract_emojis_users)
 export(extract_medias)
 export(extract_users)
 export(most_popular)

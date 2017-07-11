@@ -44,6 +44,9 @@ random_tweet <- function(query = "#rstats" ){
     pull(status_id)
 }
 
+emoji_regex <- "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF\u2600-\u27ff]+"
+not_equal <- function( x, text = "-" ) x[ x != text ]
+
 #' Extract emojis
 #'
 #' @param text text with emojis
@@ -58,9 +61,6 @@ random_tweet <- function(query = "#rstats" ){
 #' @importFrom tibble as_tibble
 #' @importFrom magrittr %>% set_names
 extract_emojis <- function(text){
-  emoji_regex <- "[\\uD83C-\\uDBFF\\uDC00-\\uDFFF\u2600-\u27ff]+"
-  not_equal <- function( x, text = "-" ) x[ x != text ]
-  
   str_extract_all(text, emoji_regex ) %>% 
     flatten_chr() %>% 
     str_split("") %>% 
@@ -71,6 +71,37 @@ extract_emojis <- function(text){
     as_tibble() %>% 
     set_names( c("Emoji", "n") )
 }
+
+#' Extract information about users that use emojis
+#' 
+#' @param tweets tweets data set
+#' @export
+extract_emojis_users <- function(tweets){
+  
+  data <- tweets %>% 
+    select( user_id, text ) %>% 
+    mutate( 
+      emojis = str_extract_all(text, emoji_regex ) %>% map( not_equal, "-" )
+    ) %>% 
+    filter( map_int(emojis, length) > 0 ) %>% 
+    group_by( user_id ) %>% 
+    summarise( 
+      emojis = map(emojis, ~ flatten_chr(str_split(., "") ) ) %>% flatten_chr() %>% table() %>% list()
+    ) %>% 
+    mutate( 
+      total = map_int(emojis, sum), 
+      distinct = map_int(emojis, length), 
+      emojis = map_chr( emojis, ~ paste( names(.)[ order(., decreasing = TRUE)], collapse = "") )
+    ) %>% 
+    arrange( desc(total) )
+
+  left_join( data, lookup_users(data$user_id), by = "user_id" ) %>% 
+    mutate( img = sprintf('<img src="%s" />', profile_image_url ) ) %>% 
+    select( img, name, total, distinct, emojis )
+  
+}
+
+
 
 #' @importFrom rlang enquo
 most <- function( tweets, n = 6, var ){
