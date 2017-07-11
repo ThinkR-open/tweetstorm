@@ -29,7 +29,7 @@ thinkr_branding <- function( repo = "tweetstorm" ){
 
 ui <- dashboardPage( skin = "black", 
   dashboardHeader(title = "tweetstorm"),
-  dashboardSidebar(
+  dashboardSidebar( disable = TRUE, 
     
     textInput("query", label = "Query", value = "#useR2017"),
     actionButton( "refresh", label = NULL, icon = icon( "refresh" ) ),
