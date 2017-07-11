@@ -3,8 +3,8 @@ title: tweetstorm
 account: thinkr
 server: shinyapps.io
 appId: 194923
-bundleId: 896862
+bundleId: 896928
 url: https://thinkr.shinyapps.io/tweetstorm/
-when: 1499583049.79131
+when: 1499588860.78421
 asMultiple: FALSE
 asStatic: FALSE

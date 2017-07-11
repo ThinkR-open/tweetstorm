@@ -168,9 +168,10 @@ extract_users <- function( x ){
     summarise( n = n() ) %>%
     arrange( desc(n) )
   
-  bind_cols( 
-    select(users, -id), 
-    lookup_users(users$id)
+  left_join( 
+    users, 
+    lookup_users(users$id), 
+    by = c("id" = "user_id")
   )
 }
 
