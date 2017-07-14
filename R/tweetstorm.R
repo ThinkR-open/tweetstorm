@@ -238,6 +238,7 @@ pack <- function(data, var, ... ){
     arrange( desc(group) )
 }
 
+#' @importFrom dplyr bind_rows
 update_search <- function( data, ... ){
   res <- search_tweets( ... )
   bind_rows( filter( data, ! status_id %in% res$status_id  ), res )

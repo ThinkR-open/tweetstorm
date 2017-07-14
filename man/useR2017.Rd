@@ -4,7 +4,7 @@
 \name{useR2017}
 \alias{useR2017}
 \title{Tweets from the useR 2017 conference}
-\format{An object of class \code{data.frame} with 1840 rows and 35 columns.}
+\format{An object of class \code{data.frame} with 2003 rows and 35 columns.}
 \usage{
 useR2017
 }
